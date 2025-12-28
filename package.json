@@ -1,0 +1,29 @@
+{
+  "name": "planner-api",
+  "version": "1.0.0",
+  "description": "Een Node.js/Express API project voor een schoolopdracht van het vak Backend Web.",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Brend-VanDenEynde/planner-api.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Brend-VanDenEynde/planner-api/issues"
+  },
+  "homepage": "https://github.com/Brend-VanDenEynde/planner-api#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
+}
