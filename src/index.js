@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const db = require('./config/database');
 
 const PORT = process.env.PORT || 3000;
 
@@ -11,13 +12,20 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/', (req, res) => {
   res.json({ 
     message: 'Welcome to Planner API',
-    status: 'running'
+    status: 'running',
+    endpoints: {
+      health: '/api/health'
+    }
   });
 });
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
+
+// API Routes
+const apiRoutes = require('./routes');
+app.use('/api', apiRoutes);
 
 // Start server
 app.listen(PORT, () => {

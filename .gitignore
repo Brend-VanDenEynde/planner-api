@@ -2,6 +2,10 @@
 node_modules/
 .env
 
+# Database
+data/*.db
+data/*.db-journal
+
 # Logs
 logs
 *.log
