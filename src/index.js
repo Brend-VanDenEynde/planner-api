@@ -1,4 +1,6 @@
 const express = require('express');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./config/swagger');
 const app = express();
 const db = require('./config/database');
 
@@ -8,23 +10,37 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Swagger Documentation op root
+app.use('/', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Error:', err);
   res.status(500).json({ error: err.message });
 });
 
-// Routes
-app.get('/', (req, res) => {
-  res.json({ 
-    message: 'Welcome to Planner API',
-    status: 'running',
-    endpoints: {
-      health: '/api/health',
-      users: '/api/users',
-      tasks: '/api/tasks'
-    }
-  });
+/**
+ * @swagger
+ * /api/health:
+ *   get:
+ *     summary: Health check endpoint
+ *     description: Controleert of de API draait
+ *     tags: [Health]
+ *     responses:
+ *       200:
+ *         description: API is operationeel
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 timestamp:
+ *                   type: string
+ */
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
 app.get('/api/health', (req, res) => {
