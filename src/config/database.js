@@ -32,7 +32,10 @@ const initDatabase = () => {
     );
   `);
 
-  console.log('Database geïnitialiseerd:', DB_PATH);
+  const tableCount = db.prepare("SELECT COUNT(*) as count FROM sqlite_master WHERE type='table' AND name IN ('users', 'opdrachten')").get();
+  console.log('[DATABASE] Initialisatie succesvol');
+  console.log(`[DATABASE] ${tableCount.count} tabellen aanwezig`);
+  console.log(`[DATABASE] Locatie: ${DB_PATH}`);
 };
 
 // Initialiseer bij opstarten

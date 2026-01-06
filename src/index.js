@@ -10,9 +10,19 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Request logging middleware
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    console.log(`[API] ${req.method} ${req.path} - ${res.statusCode} (${duration}ms)`);
+  });
+  next();
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error('Error:', err);
+  console.error(`[ERROR] ${req.method} ${req.path} - ${err.message}`);
   res.status(500).json({ error: err.message });
 });
 
@@ -49,5 +59,9 @@ app.use('/', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Start server
 const server = app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log('[SERVER] Applicatie gestart');
+  console.log(`[SERVER] Poort: ${PORT}`);
+  console.log(`[SERVER] Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log('[SERVER] API endpoints beschikbaar op /api');
+  console.log('[SERVER] Swagger documentatie beschikbaar op /');
 });

@@ -4,8 +4,10 @@ const db = require('../config/database');
 const getAllUsers = (req, res) => {
   try {
     const users = db.prepare('SELECT * FROM users ORDER BY created_at DESC').all();
+    console.log(`[USERS] GET all - ${users.length} records`);
     res.json({ users });
   } catch (err) {
+    console.error('[USERS] GET all - Error:', err.message);
     res.status(500).json({ error: err.message });
   }
 };
@@ -16,10 +18,13 @@ const getUserById = (req, res) => {
   try {
     const user = db.prepare('SELECT * FROM users WHERE id = ?').get(id);
     if (!user) {
+      console.log(`[USERS] GET by ID ${id} - Not found`);
       return res.status(404).json({ error: 'User not found' });
     }
+    console.log(`[USERS] GET by ID ${id} - Success`);
     res.json({ user });
   } catch (err) {
+    console.error(`[USERS] GET by ID ${id} - Error:`, err.message);
     res.status(500).json({ error: err.message });
   }
 };
@@ -29,6 +34,7 @@ const createUser = (req, res) => {
   const { firstname, lastname, email } = req.body;
   
   if (!firstname || !lastname || !email) {
+    console.log('[USERS] POST - Validation failed: Missing required fields');
     return res.status(400).json({ error: 'Firstname, lastname and email are required' });
   }
 
@@ -38,6 +44,7 @@ const createUser = (req, res) => {
       VALUES (?, ?, ?)
     `);
     const result = stmt.run(firstname, lastname, email);
+    console.log(`[USERS] POST - Created user ID ${result.lastInsertRowid}`);
     
     res.status(201).json({ 
       message: 'User created',
@@ -50,8 +57,10 @@ const createUser = (req, res) => {
     });
   } catch (err) {
     if (err.message.includes('UNIQUE constraint failed')) {
+      console.log('[USERS] POST - Conflict: Email already exists');
       return res.status(400).json({ error: 'Email already exists' });
     }
+    console.error('[USERS] POST - Error:', err.message);
     res.status(500).json({ error: err.message });
   }
 };
@@ -73,13 +82,17 @@ const updateUser = (req, res) => {
     const result = stmt.run(firstname, lastname, email, id);
     
     if (result.changes === 0) {
+      console.log(`[USERS] PUT ID ${id} - Not found`);
       return res.status(404).json({ error: 'User not found' });
     }
+    console.log(`[USERS] PUT ID ${id} - Updated successfully`);
     res.json({ message: 'User updated', changes: result.changes });
   } catch (err) {
     if (err.message.includes('UNIQUE constraint failed')) {
+      console.log(`[USERS] PUT ID ${id} - Conflict: Email already exists`);
       return res.status(400).json({ error: 'Email already exists' });
     }
+    console.error(`[USERS] PUT ID ${id} - Error:`, err.message);
     res.status(500).json({ error: err.message });
   }
 };
@@ -93,10 +106,13 @@ const deleteUser = (req, res) => {
     const result = stmt.run(id);
     
     if (result.changes === 0) {
+      console.log(`[USERS] DELETE ID ${id} - Not found`);
       return res.status(404).json({ error: 'User not found' });
     }
+    console.log(`[USERS] DELETE ID ${id} - Deleted successfully`);
     res.json({ message: 'User deleted', changes: result.changes });
   } catch (err) {
+    console.error(`[USERS] DELETE ID ${id} - Error:`, err.message);
     res.status(500).json({ error: err.message });
   }
 };
@@ -109,10 +125,12 @@ const getUserTasks = (req, res) => {
     // Check if user exists
     const user = db.prepare('SELECT * FROM users WHERE id = ?').get(id);
     if (!user) {
+      console.log(`[USERS] GET tasks for ID ${id} - User not found`);
       return res.status(404).json({ error: 'User not found' });
     }
     
     const tasks = db.prepare('SELECT * FROM opdrachten WHERE user_id = ? ORDER BY due_date ASC').all(id);
+    console.log(`[USERS] GET tasks for ID ${id} - ${tasks.length} tasks found`);
     res.json({ 
       user: {
         id: user.id,
@@ -123,6 +141,7 @@ const getUserTasks = (req, res) => {
       tasks 
     });
   } catch (err) {
+    console.error(`[USERS] GET tasks for ID ${id} - Error:`, err.message);
     res.status(500).json({ error: err.message });
   }
 };
