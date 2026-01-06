@@ -21,6 +21,7 @@ app.get('/', (req, res) => {
     status: 'running',
     endpoints: {
       health: '/api/health',
+      users: '/api/users',
       tasks: '/api/tasks'
     }
   });
