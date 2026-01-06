@@ -10,9 +10,6 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Swagger Documentation op root
-app.use('/', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Error:', err);
@@ -43,13 +40,12 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
-});
-
 // API Routes
 const apiRoutes = require('./routes');
 app.use('/api', apiRoutes);
+
+// Swagger Documentation op root (moet na API routes)
+app.use('/', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Start server
 const server = app.listen(PORT, () => {
