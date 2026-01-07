@@ -1,4 +1,5 @@
 const db = require('../config/database');
+const { validateDueDate } = require('../utils/validators');
 
 // Get all opdrachten
 const getAllTasks = (req, res) => {
@@ -64,6 +65,13 @@ const createTask = (req, res) => {
     console.log('[TASKS] POST - Validation failed: Missing required fields');
     return res.status(400).json({ error: 'Title, description, user_id and due_date are required' });
   }
+  
+  // Valideer due_date
+  const dueDateError = validateDueDate(due_date);
+  if (dueDateError) {
+    console.log('[TASKS] POST - Validation failed:', dueDateError);
+    return res.status(400).json({ error: dueDateError });
+  }
 
   try {
     const stmt = db.prepare(`
@@ -94,6 +102,15 @@ const createTask = (req, res) => {
 const updateTask = (req, res) => {
   const { id } = req.params;
   const { title, description, status, due_date } = req.body;
+
+  // Valideer due_date als het wordt meegegeven
+  if (due_date !== undefined) {
+    const dueDateError = validateDueDate(due_date);
+    if (dueDateError) {
+      console.log(`[TASKS] PUT ID ${id} - Validation failed:`, dueDateError);
+      return res.status(400).json({ error: dueDateError });
+    }
+  }
 
   try {
     const stmt = db.prepare(`

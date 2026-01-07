@@ -1,4 +1,5 @@
 const db = require('../config/database');
+const { validateName, validateEmail } = require('../utils/validators');
 
 // Get all users
 const getAllUsers = (req, res) => {
@@ -60,9 +61,23 @@ const getUserById = (req, res) => {
 const createUser = (req, res) => {
   const { firstname, lastname, email } = req.body;
   
-  if (!firstname || !lastname || !email) {
-    console.log('[USERS] POST - Validation failed: Missing required fields');
-    return res.status(400).json({ error: 'Firstname, lastname and email are required' });
+  // Valideer velden
+  const firstnameError = validateName(firstname, 'Firstname');
+  if (firstnameError) {
+    console.log('[USERS] POST - Validation failed:', firstnameError);
+    return res.status(400).json({ error: firstnameError });
+  }
+  
+  const lastnameError = validateName(lastname, 'Lastname');
+  if (lastnameError) {
+    console.log('[USERS] POST - Validation failed:', lastnameError);
+    return res.status(400).json({ error: lastnameError });
+  }
+  
+  const emailError = validateEmail(email);
+  if (emailError) {
+    console.log('[USERS] POST - Validation failed:', emailError);
+    return res.status(400).json({ error: emailError });
   }
 
   try {
@@ -96,6 +111,31 @@ const createUser = (req, res) => {
 const updateUser = (req, res) => {
   const { id } = req.params;
   const { firstname, lastname, email } = req.body;
+
+  // Valideer alleen als velden worden meegegeven
+  if (firstname !== undefined) {
+    const firstnameError = validateName(firstname, 'Firstname');
+    if (firstnameError) {
+      console.log(`[USERS] PUT ID ${id} - Validation failed:`, firstnameError);
+      return res.status(400).json({ error: firstnameError });
+    }
+  }
+  
+  if (lastname !== undefined) {
+    const lastnameError = validateName(lastname, 'Lastname');
+    if (lastnameError) {
+      console.log(`[USERS] PUT ID ${id} - Validation failed:`, lastnameError);
+      return res.status(400).json({ error: lastnameError });
+    }
+  }
+  
+  if (email !== undefined) {
+    const emailError = validateEmail(email);
+    if (emailError) {
+      console.log(`[USERS] PUT ID ${id} - Validation failed:`, emailError);
+      return res.status(400).json({ error: emailError });
+    }
+  }
 
   try {
     const stmt = db.prepare(`
