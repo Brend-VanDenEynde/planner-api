@@ -291,6 +291,30 @@ router.get('/tasks', taskController.getAllTasks);
 
 /**
  * @swagger
+ * /api/tasks/overdue:
+ *   get:
+ *     summary: Haal taken op die te laat zijn
+ *     tags: [Tasks]
+ *     responses:
+ *       200:
+ *         description: Lijst van overdue taken
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 overdue_tasks:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Task'
+ *                 count:
+ *                   type: integer
+ *                   description: Aantal overdue taken
+ */
+router.get('/tasks/overdue', taskController.getOverdueTasks);
+
+/**
+ * @swagger
  * /api/tasks/{id}:
  *   get:
  *     summary: Haal specifieke taak op
@@ -431,5 +455,105 @@ router.put('/tasks/:id', taskController.updateTask);
  *         description: Taak niet gevonden
  */
 router.delete('/tasks/:id', taskController.deleteTask);
+
+/**
+ * @swagger
+ * /api/tasks/{id}/status:
+ *   put:
+ *     summary: Update alleen de status van een taak
+ *     tags: [Tasks]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Taak ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - status
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [open, in_progress, done]
+ *                 example: in_progress
+ *     responses:
+ *       200:
+ *         description: Status succesvol geüpdatet
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 status:
+ *                   type: string
+ *       400:
+ *         description: Ongeldige status
+ *       404:
+ *         description: Taak niet gevonden
+ */
+router.put('/tasks/:id/status', taskController.updateTaskStatus);
+
+/**
+ * @swagger
+ * /api/users/{id}/stats:
+ *   get:
+ *     summary: Haal statistieken op voor een gebruiker
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Gebruiker ID
+ *     responses:
+ *       200:
+ *         description: Gebruiker statistieken
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                     firstname:
+ *                       type: string
+ *                     lastname:
+ *                       type: string
+ *                     email:
+ *                       type: string
+ *                 tasks:
+ *                   type: object
+ *                   properties:
+ *                     total:
+ *                       type: integer
+ *                       description: Totaal aantal taken
+ *                     open:
+ *                       type: integer
+ *                       description: Aantal open taken
+ *                     in_progress:
+ *                       type: integer
+ *                       description: Aantal taken in uitvoering
+ *                     done:
+ *                       type: integer
+ *                       description: Aantal afgeronde taken
+ *                     overdue:
+ *                       type: integer
+ *                       description: Aantal te late taken
+ *       404:
+ *         description: Gebruiker niet gevonden
+ */
+router.get('/users/:id/stats', userController.getUserStats);
 
 module.exports = router;
