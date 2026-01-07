@@ -107,13 +107,16 @@ router.get('/users/:id', userController.getUserById);
  *               firstname:
  *                 type: string
  *                 example: Jan
+ *                 description: Mag geen cijfers bevatten
  *               lastname:
  *                 type: string
  *                 example: Janssen
+ *                 description: Mag geen cijfers bevatten
  *               email:
  *                 type: string
  *                 format: email
  *                 example: jan.janssen@example.com
+ *                 description: Geldig email formaat vereist
  *     responses:
  *       201:
  *         description: Gebruiker succesvol aangemaakt
@@ -156,18 +159,21 @@ router.post('/users', userController.createUser);
  *             properties:
  *               firstname:
  *                 type: string
+ *                 description: Mag geen cijfers bevatten
  *               lastname:
  *                 type: string
+ *                 description: Mag geen cijfers bevatten
  *               email:
  *                 type: string
  *                 format: email
+ *                 description: Geldig email formaat vereist
  *     responses:
  *       200:
  *         description: Gebruiker succesvol geüpdatet
  *       404:
  *         description: Gebruiker niet gevonden
  *       400:
- *         description: Email bestaat al
+ *         description: Email bestaat al of ongeldige invoer
  */
 router.put('/users/:id', userController.updateUser);
 
@@ -339,6 +345,7 @@ router.get('/tasks/:id', taskController.getTaskById);
  *                 type: string
  *                 format: date
  *                 example: 2026-01-15
+ *                 description: Deadline (moet in de toekomst liggen)
  *     responses:
  *       201:
  *         description: Taak succesvol aangemaakt
@@ -352,7 +359,7 @@ router.get('/tasks/:id', taskController.getTaskById);
  *                 task:
  *                   $ref: '#/components/schemas/Task'
  *       400:
- *         description: Ongeldige invoer
+ *         description: Ongeldige invoer of due_date ligt in het verleden
  */
 router.post('/tasks', taskController.createTask);
 
@@ -385,11 +392,14 @@ router.post('/tasks', taskController.createTask);
  *               due_date:
  *                 type: string
  *                 format: date
+ *                 description: Deadline (moet in de toekomst liggen)
  *     responses:
  *       200:
  *         description: Taak succesvol geüpdatet
  *       404:
  *         description: Taak niet gevonden
+ *       400:
+ *         description: Due_date ligt in het verleden
  */
 router.put('/tasks/:id', taskController.updateTask);
 
