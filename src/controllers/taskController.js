@@ -157,10 +157,71 @@ const deleteTask = (req, res) => {
   }
 };
 
+// Get overdue tasks
+const getOverdueTasks = (req, res) => {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const tasks = db.prepare(`
+      SELECT * FROM opdrachten 
+      WHERE due_date < ? AND status != 'done'
+      ORDER BY due_date ASC
+    `).all(today);
+    
+    console.log(`[TASKS] GET overdue - ${tasks.length} records`);
+    res.json({ 
+      overdue_tasks: tasks,
+      count: tasks.length
+    });
+  } catch (err) {
+    console.error('[TASKS] GET overdue - Error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Update only status
+const updateTaskStatus = (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  
+  if (!status) {
+    console.log(`[TASKS] PATCH status ID ${id} - Missing status`);
+    return res.status(400).json({ error: 'Status is required' });
+  }
+  
+  const validStatuses = ['open', 'in_progress', 'done'];
+  if (!validStatuses.includes(status)) {
+    console.log(`[TASKS] PATCH status ID ${id} - Invalid status: ${status}`);
+    return res.status(400).json({ error: 'Invalid status. Must be: open, in_progress, or done' });
+  }
+  
+  try {
+    const stmt = db.prepare(`
+      UPDATE opdrachten 
+      SET status = ?,
+          updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `);
+    
+    const result = stmt.run(status, id);
+    
+    if (result.changes === 0) {
+      console.log(`[TASKS] PATCH status ID ${id} - Not found`);
+      return res.status(404).json({ error: 'Task not found' });
+    }
+    console.log(`[TASKS] PATCH status ID ${id} - Updated to ${status}`);
+    res.json({ message: 'Task status updated', status });
+  } catch (err) {
+    console.error(`[TASKS] PATCH status ID ${id} - Error:`, err.message);
+    res.status(500).json({ error: err.message });
+  }
+};
+
 module.exports = {
   getAllTasks,
   getTaskById,
   createTask,
   updateTask,
-  deleteTask
+  deleteTask,
+  getOverdueTasks,
+  updateTaskStatus
 };
