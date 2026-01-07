@@ -22,6 +22,12 @@ const userController = require('../controllers/userController');
  *           type: integer
  *           default: 0
  *         description: Aantal gebruikers over te slaan (voor paginering)
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Zoek in firstname, lastname en email
+ *         example: jan
  *     responses:
  *       200:
  *         description: Lijst van alle gebruikers
@@ -237,6 +243,12 @@ router.get('/users/:id/tasks', userController.getUserTasks);
  *           type: integer
  *           default: 0
  *         description: Aantal taken over te slaan (voor paginering)
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Zoek in title en description
+ *         example: backend
  *     responses:
  *       200:
  *         description: Lijst van alle taken

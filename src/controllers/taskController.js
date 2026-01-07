@@ -5,11 +5,26 @@ const getAllTasks = (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 10;
     const offset = parseInt(req.query.offset) || 0;
+    const search = req.query.search || '';
     
-    const tasks = db.prepare('SELECT * FROM opdrachten ORDER BY created_at DESC LIMIT ? OFFSET ?').all(limit, offset);
-    const total = db.prepare('SELECT COUNT(*) as count FROM opdrachten').get();
+    let query = 'SELECT * FROM opdrachten';
+    let countQuery = 'SELECT COUNT(*) as count FROM opdrachten';
+    let params = [];
     
-    console.log(`[TASKS] GET all - ${tasks.length} records (limit: ${limit}, offset: ${offset})`);
+    if (search) {
+      const searchPattern = `%${search}%`;
+      query += ' WHERE title LIKE ? OR description LIKE ?';
+      countQuery += ' WHERE title LIKE ? OR description LIKE ?';
+      params = [searchPattern, searchPattern];
+    }
+    
+    query += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
+    params.push(limit, offset);
+    
+    const tasks = db.prepare(query).all(...params);
+    const total = db.prepare(countQuery).get(...(search ? [searchPattern, searchPattern] : []));
+    
+    console.log(`[TASKS] GET all - ${tasks.length} records (limit: ${limit}, offset: ${offset}, search: "${search}")`);
     res.json({ 
       tasks,
       pagination: {
