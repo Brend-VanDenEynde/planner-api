@@ -11,19 +11,21 @@ const getAllUsers = (req, res) => {
     let query = 'SELECT * FROM users';
     let countQuery = 'SELECT COUNT(*) as count FROM users';
     let params = [];
+    let countParams = [];
     
     if (search) {
       const searchPattern = `%${search}%`;
       query += ' WHERE firstname LIKE ? OR lastname LIKE ? OR email LIKE ?';
       countQuery += ' WHERE firstname LIKE ? OR lastname LIKE ? OR email LIKE ?';
       params = [searchPattern, searchPattern, searchPattern];
+      countParams = [searchPattern, searchPattern, searchPattern];
     }
     
     query += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
     params.push(limit, offset);
     
     const users = db.prepare(query).all(...params);
-    const total = db.prepare(countQuery).get(...(search ? [searchPattern, searchPattern, searchPattern] : []));
+    const total = db.prepare(countQuery).get(...countParams);
     
     console.log(`[USERS] GET all - ${users.length} records (limit: ${limit}, offset: ${offset}, search: "${search}")`);
     res.json({ 
