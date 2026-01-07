@@ -19,6 +19,16 @@ const isValidFutureDate = (dateString) => {
   return inputDate >= today;
 };
 
+// Valideer of gebruiker bestaat in database
+const userExists = (db, userId) => {
+  try {
+    const user = db.prepare('SELECT id FROM users WHERE id = ?').get(userId);
+    return !!user;
+  } catch (err) {
+    return false;
+  }
+};
+
 // Validatie helper voor naam velden
 const validateName = (name, fieldName) => {
   if (!name || name.trim() === '') {
@@ -58,5 +68,6 @@ module.exports = {
   isValidFutureDate,
   validateName,
   validateEmail,
-  validateDueDate
+  validateDueDate,
+  userExists
 };
