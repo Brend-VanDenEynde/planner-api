@@ -348,11 +348,12 @@ router.get('/tasks/:id', taskController.getTaskById);
  *               user_id:
  *                 type: integer
  *                 example: 1
+ *                 description: ID van bestaande gebruiker (moet bestaan in database)
  *               due_date:
  *                 type: string
  *                 format: date
  *                 example: 2026-01-15
- *                 description: Deadline (moet in de toekomst liggen)
+ *                 description: Deadline (moet in de toekomst liggen, automatisch na created_at)
  *     responses:
  *       201:
  *         description: Taak succesvol aangemaakt
@@ -366,7 +367,7 @@ router.get('/tasks/:id', taskController.getTaskById);
  *                 task:
  *                   $ref: '#/components/schemas/Task'
  *       400:
- *         description: Ongeldige invoer of due_date ligt in het verleden
+ *         description: Ongeldige invoer, user_id bestaat niet, of due_date ligt in het verleden
  */
 router.post('/tasks', taskController.createTask);
 
