@@ -1,5 +1,5 @@
 const db = require('../config/database');
-const { validateDueDate } = require('../utils/validators');
+const { validateDueDate, userExists } = require('../utils/validators');
 const { buildTasksFilterQuery } = require('../utils/filters');
 
 // Get all opdrachten
@@ -60,7 +60,13 @@ const createTask = (req, res) => {
     return res.status(400).json({ error: 'Title, description, user_id and due_date are required' });
   }
   
-  // Valideer due_date
+  // Valideer of user bestaat
+  if (!userExists(db, user_id)) {
+    console.log('[TASKS] POST - Validation failed: User does not exist');
+    return res.status(400).json({ error: 'User_id does not exist' });
+  }
+  
+  // Valideer due_date (moet in toekomst liggen, dus automatisch na created_at)
   const dueDateError = validateDueDate(due_date);
   if (dueDateError) {
     console.log('[TASKS] POST - Validation failed:', dueDateError);
