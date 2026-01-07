@@ -182,6 +182,7 @@ Bij de ontwikkeling van dit project is gebruik gemaakt van AI-assistentie op de 
 - **AI voor commit messages** - Voor het genereren van duidelijke en consistente commit beschrijvingen
 - **AI voor probleemoplossing** - Voor het opzoeken van informatie en oplossingen wanneer ik vastzat met specifieke implementaties
 - **AI voor markdown formatting** - Voor het helpen met de structuur, layout en markdown types van deze README
+- **AI voor GitHub Actions** - Voor het opzetten van de build workflow en CI/CD configuratie
 
 ## Bronnen
 
