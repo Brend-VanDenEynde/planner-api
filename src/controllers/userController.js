@@ -3,9 +3,21 @@ const db = require('../config/database');
 // Get all users
 const getAllUsers = (req, res) => {
   try {
-    const users = db.prepare('SELECT * FROM users ORDER BY created_at DESC').all();
-    console.log(`[USERS] GET all - ${users.length} records`);
-    res.json({ users });
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = parseInt(req.query.offset) || 0;
+    
+    const users = db.prepare('SELECT * FROM users ORDER BY created_at DESC LIMIT ? OFFSET ?').all(limit, offset);
+    const total = db.prepare('SELECT COUNT(*) as count FROM users').get();
+    
+    console.log(`[USERS] GET all - ${users.length} records (limit: ${limit}, offset: ${offset})`);
+    res.json({ 
+      users,
+      pagination: {
+        limit,
+        offset,
+        total: total.count
+      }
+    });
   } catch (err) {
     console.error('[USERS] GET all - Error:', err.message);
     res.status(500).json({ error: err.message });

@@ -9,6 +9,19 @@ const userController = require('../controllers/userController');
  *   get:
  *     summary: Haal alle gebruikers op
  *     tags: [Users]
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Aantal gebruikers per pagina
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *           default: 0
+ *         description: Aantal gebruikers over te slaan (voor paginering)
  *     responses:
  *       200:
  *         description: Lijst van alle gebruikers
@@ -21,6 +34,18 @@ const userController = require('../controllers/userController');
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/User'
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     limit:
+ *                       type: integer
+ *                       description: Aantal items per pagina
+ *                     offset:
+ *                       type: integer
+ *                       description: Aantal items overgeslagen
+ *                     total:
+ *                       type: integer
+ *                       description: Totaal aantal gebruikers
  */
 router.get('/users', userController.getAllUsers);
 
@@ -199,6 +224,19 @@ router.get('/users/:id/tasks', userController.getUserTasks);
  *   get:
  *     summary: Haal alle taken op
  *     tags: [Tasks]
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Aantal taken per pagina
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *           default: 0
+ *         description: Aantal taken over te slaan (voor paginering)
  *     responses:
  *       200:
  *         description: Lijst van alle taken
@@ -211,6 +249,18 @@ router.get('/users/:id/tasks', userController.getUserTasks);
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/Task'
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     limit:
+ *                       type: integer
+ *                       description: Aantal items per pagina
+ *                     offset:
+ *                       type: integer
+ *                       description: Aantal items overgeslagen
+ *                     total:
+ *                       type: integer
+ *                       description: Totaal aantal taken
  */
 router.get('/tasks', taskController.getAllTasks);
 

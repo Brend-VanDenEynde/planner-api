@@ -3,9 +3,21 @@ const db = require('../config/database');
 // Get all opdrachten
 const getAllTasks = (req, res) => {
   try {
-    const tasks = db.prepare('SELECT * FROM opdrachten ORDER BY created_at DESC').all();
-    console.log(`[TASKS] GET all - ${tasks.length} records`);
-    res.json({ tasks });
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = parseInt(req.query.offset) || 0;
+    
+    const tasks = db.prepare('SELECT * FROM opdrachten ORDER BY created_at DESC LIMIT ? OFFSET ?').all(limit, offset);
+    const total = db.prepare('SELECT COUNT(*) as count FROM opdrachten').get();
+    
+    console.log(`[TASKS] GET all - ${tasks.length} records (limit: ${limit}, offset: ${offset})`);
+    res.json({ 
+      tasks,
+      pagination: {
+        limit,
+        offset,
+        total: total.count
+      }
+    });
   } catch (err) {
     console.error('[TASKS] GET all - Error:', err.message);
     res.status(500).json({ error: err.message });
