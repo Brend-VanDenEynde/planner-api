@@ -6,19 +6,27 @@ Een professionele REST API voor het beheren van gebruikers en taken, gebouwd met
 
 Deze API biedt een complete oplossing voor taakbeheer met geavanceerde functies zoals paginering, zoeken, filtering en validatie. Het project is gebouwd met moderne best practices en bevat uitgebreide Swagger documentatie voor eenvoudige integratie.
 
-### Belangrijkste Features
+### Features
 
-- **CRUD operaties** voor gebruikers en taken
+- **CRUD operaties** voor gebruikers en taken (volledige Create, Read, Update, Delete)
 - **Paginering** met limit en offset parameters
-- **Zoekfunctionaliteit** in meerdere velden
+- **Zoekfunctionaliteit** in meerdere velden (firstname, lastname, email voor users; title, description voor tasks)
 - **Status filtering** voor taken (open, in_progress, done)
+- **Gebruikers Statistieken** - totaal, open, in_progress, done, overdue per gebruiker
+- **Taken per Gebruiker** - gesorteerd op deadline
+- **Overdue Tasks** - alle taken die hun deadline hebben overschreden
+- **Dedicated Status Update** - update alleen de status van een taak
+- **Health Check** - controleer of de API beschikbaar is
 - **Geavanceerde validatie**:
-  - Email format controle (regex)
+  - Email format controle met regex pattern
   - Naam validatie (geen cijfers toegestaan)
   - Datum validatie (due_date moet in toekomst liggen)
+  - Foreign key validatie (user_id moet bestaan)
 - **Swagger UI** voor interactieve API documentatie
-- **SQLite database** met foreign key constraints
+- **SQLite database** met foreign key constraints en ON DELETE CASCADE
 - **Request logging** met response tijden
+- **Advanced Error Handling** - proper HTTP status codes en gedetailleerde error messages
+- **Development Tools** - database seeder, nodemon, structured logging
 
 ## Installatie
 
@@ -60,21 +68,28 @@ De server draait nu op `http://localhost:3000`
 
 ## API Endpoints
 
+### Health Check
+
+- `GET /api/health` - Controleert of API operationeel is
+
 ### Users
 
-- `GET /api/users` - Haal alle gebruikers op
+- `GET /api/users` - Haal alle gebruikers op (met paginering & zoeken)
 - `GET /api/users/:id` - Haal specifieke gebruiker op
-- `GET /api/users/:id/tasks` - Haal taken van gebruiker op
+- `GET /api/users/:id/tasks` - Haal alle taken van gebruiker op (sorted by due_date)
+- `GET /api/users/:id/stats` - Statistieken per gebruiker (totaal, open, in_progress, done, overdue)
 - `POST /api/users` - Maak nieuwe gebruiker aan
 - `PUT /api/users/:id` - Update gebruiker
-- `DELETE /api/users/:id` - Verwijder gebruiker
+- `DELETE /api/users/:id` - Verwijder gebruiker (ook alle bijbehorende taken)
 
 ### Tasks
 
-- `GET /api/tasks` - Haal alle taken op
+- `GET /api/tasks` - Haal alle taken op (met paginering, zoeken & filtering)
 - `GET /api/tasks/:id` - Haal specifieke taak op
+- `GET /api/tasks/overdue` - Haal alle te late taken op (due_date < vandaag)
 - `POST /api/tasks` - Maak nieuwe taak aan
-- `PUT /api/tasks/:id` - Update taak
+- `PUT /api/tasks/:id` - Update taak (titel, beschrijving, status, of deadline)
+- `PUT /api/tasks/:id/status` - Update alleen de status van een taak
 - `DELETE /api/tasks/:id` - Verwijder taak
 
 ### Query Parameters
@@ -184,13 +199,81 @@ Bij de ontwikkeling van dit project is gebruik gemaakt van AI-assistentie op de 
 - **AI voor markdown formatting** - Voor het helpen met de structuur, layout en markdown types van deze README
 - **AI voor GitHub Actions** - Voor het opzetten van de build workflow en CI/CD configuratie
 
-## Bronnen
+## Bronvermeldingen & Referenties
 
-- [Express.js Documentatie](https://expressjs.com/)
-- [better-sqlite3 Documentatie](https://github.com/WiseLibs/better-sqlite3)
-- [Swagger UI Express](https://www.npmjs.com/package/swagger-ui-express)
-- [Node.js Best Practices](https://github.com/goldbergyoni/nodebestpractices)
-- [RESTful API Design](https://restfulapi.net/)
+### Documentatie
+
+- **[Express.js Official Documentation](https://expressjs.com/)** - Web framework setup, middleware, routing
+- **[better-sqlite3 GitHub](https://github.com/WiseLibs/better-sqlite3)** - SQLite integration, database best practices
+- **[Swagger/OpenAPI Specification](https://swagger.io/specification/)** - API documentation standards
+- **[Node.js Best Practices](https://github.com/goldbergyoni/nodebestpractices)** - Code structure, error handling, security
+
+### Implementatie Details
+
+- **Email Validation Regex**: Standaard email pattern uit RFC 5322 (vereenvoudigd)
+
+  - Pattern: `/^[^\s@]+@[^\s@]+\.[^\s@]+$/`
+  - Referentie: [StackOverflow email validation discussion](https://stackoverflow.com/questions/46155/how-to-validate-email-address-in-javascript)
+
+- **Date Validation**: JavaScript Date API voor toekomst-check
+
+  - Best practice: Datum vergelijkingen altijd uitvoeren op UTC niveau
+  - Referentie: [MDN Date Object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)
+
+- **SQL Injection Prevention**: Prepared statements via better-sqlite3
+
+  - Pattern: `db.prepare(query).run(params)` in plaats van string concatenation
+  - Referentie: [OWASP SQL Injection Prevention](https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html)
+
+- **REST API Design**: HTTP verbs en status codes
+  - GET (200) - Succesvol ophalen
+  - POST (201) - Succesvol aangemaakt
+  - PUT (200) - Succesvol geüpdatet
+  - DELETE (200) - Succesvol verwijderd
+  - Referentie: [RESTful API Best Practices](https://restfulapi.net/http-status-codes/)
+
+### Database Design
+
+- **Foreign Key Constraints**: Relationele integriteit
+
+  - `FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE`
+  - Automatisch verwijder taken wanneer gebruiker verwijderd wordt
+  - Referentie: [SQLite Foreign Keys](https://www.sqlite.org/foreignkeys.html)
+
+- **Schema Validatie**: CHECK constraints voor data kwaliteit
+
+  - `CHECK(status IN ('open', 'in_progress', 'done'))`
+  - Database-level validatie voor enum-achtige velden
+  - Referentie: [SQLite Constraints](https://www.sqlite.org/syntax/column-constraint.html)
+
+- **Timestamps**: created_at en updated_at columns
+  - Automatische timestamp management met `CURRENT_TIMESTAMP`
+  - Referentie: [SQLite Date/Time Functions](https://www.sqlite.org/lang_datefunc.html)
+
+### Development & Tools
+
+- **Nodemon**: Automatische server restart during development
+
+  - Configuratie via `nodemon.json` (of direct in package.json scripts)
+  - Referentie: [Nodemon Documentation](https://nodemon.io/)
+
+- **CORS Configuration**: Cross-Origin Resource Sharing
+
+  - Configuratie voor localhost development ports
+  - Referentie: [Express CORS Middleware](https://expressjs.com/en/resources/middleware/cors.html)
+
+- **Request Logging**: Performance monitoring
+  - Logging van request method, path, status code, en response time
+  - Nuttig voor debugging en performance analysis
+
+### Externe Libraries
+
+- **Express** (v5.2.1) - Web framework
+- **better-sqlite3** (v12.5.0) - SQLite driver
+- **swagger-jsdoc** (v6.2.8) - JSDoc to Swagger converter
+- **swagger-ui-express** (v5.0.1) - Swagger UI middleware
+- **cors** (v2.8.5) - CORS middleware
+- **nodemon** (v3.1.11 dev) - Auto-restart tool
 
 ## Auteur
 
