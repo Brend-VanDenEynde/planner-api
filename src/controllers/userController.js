@@ -215,11 +215,58 @@ const getUserTasks = (req, res) => {
   }
 };
 
+// Get user statistics
+const getUserStats = (req, res) => {
+  const { id } = req.params;
+  
+  try {
+    // Check if user exists
+    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(id);
+    if (!user) {
+      console.log(`[USERS] GET stats for ID ${id} - User not found`);
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    // Count tasks by status
+    const totalTasks = db.prepare('SELECT COUNT(*) as count FROM opdrachten WHERE user_id = ?').get(id);
+    const openTasks = db.prepare('SELECT COUNT(*) as count FROM opdrachten WHERE user_id = ? AND status = ?').get(id, 'open');
+    const inProgressTasks = db.prepare('SELECT COUNT(*) as count FROM opdrachten WHERE user_id = ? AND status = ?').get(id, 'in_progress');
+    const doneTasks = db.prepare('SELECT COUNT(*) as count FROM opdrachten WHERE user_id = ? AND status = ?').get(id, 'done');
+    
+    // Count overdue tasks
+    const today = new Date().toISOString().split('T')[0];
+    const overdueTasks = db.prepare('SELECT COUNT(*) as count FROM opdrachten WHERE user_id = ? AND due_date < ? AND status != ?').get(id, today, 'done');
+    
+    const stats = {
+      user: {
+        id: user.id,
+        firstname: user.firstname,
+        lastname: user.lastname,
+        email: user.email
+      },
+      tasks: {
+        total: totalTasks.count,
+        open: openTasks.count,
+        in_progress: inProgressTasks.count,
+        done: doneTasks.count,
+        overdue: overdueTasks.count
+      }
+    };
+    
+    console.log(`[USERS] GET stats for ID ${id} - Success`);
+    res.json(stats);
+  } catch (err) {
+    console.error(`[USERS] GET stats for ID ${id} - Error:`, err.message);
+    res.status(500).json({ error: err.message });
+  }
+};
+
 module.exports = {
   getAllUsers,
   getUserById,
   createUser,
   updateUser,
   deleteUser,
-  getUserTasks
+  getUserTasks,
+  getUserStats
 };
