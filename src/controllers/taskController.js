@@ -1,5 +1,6 @@
 const db = require('../config/database');
 const { validateDueDate } = require('../utils/validators');
+const { buildTasksFilterQuery } = require('../utils/filters');
 
 // Get all opdrachten
 const getAllTasks = (req, res) => {
@@ -7,25 +8,18 @@ const getAllTasks = (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const offset = parseInt(req.query.offset) || 0;
     const search = req.query.search || '';
+    const status = req.query.status || '';
     
-    let query = 'SELECT * FROM opdrachten';
-    let countQuery = 'SELECT COUNT(*) as count FROM opdrachten';
-    let params = [];
+    // Bouw filter query met WHERE clause
+    const { whereClause, params } = buildTasksFilterQuery(search, status);
     
-    if (search) {
-      const searchPattern = `%${search}%`;
-      query += ' WHERE title LIKE ? OR description LIKE ?';
-      countQuery += ' WHERE title LIKE ? OR description LIKE ?';
-      params = [searchPattern, searchPattern];
-    }
+    const query = `SELECT * FROM opdrachten${whereClause} ORDER BY created_at DESC LIMIT ? OFFSET ?`;
+    const countQuery = `SELECT COUNT(*) as count FROM opdrachten${whereClause}`;
     
-    query += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
-    params.push(limit, offset);
+    const tasks = db.prepare(query).all(...params, limit, offset);
+    const total = db.prepare(countQuery).get(...params);
     
-    const tasks = db.prepare(query).all(...params);
-    const total = db.prepare(countQuery).get(...(search ? [searchPattern, searchPattern] : []));
-    
-    console.log(`[TASKS] GET all - ${tasks.length} records (limit: ${limit}, offset: ${offset}, search: "${search}")`);
+    console.log(`[TASKS] GET all - ${tasks.length} records (limit: ${limit}, offset: ${offset}, search: "${search}", status: "${status}")`);
     res.json({ 
       tasks,
       pagination: {
