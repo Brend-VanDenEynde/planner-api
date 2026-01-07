@@ -255,6 +255,13 @@ router.get('/users/:id/tasks', userController.getUserTasks);
  *           type: string
  *         description: Zoek in title en description
  *         example: backend
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [open, in_progress, done]
+ *         description: Filter taken op status
+ *         example: open
  *     responses:
  *       200:
  *         description: Lijst van alle taken
